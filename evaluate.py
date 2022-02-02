@@ -19,6 +19,18 @@ def delivery(i, j, deliveries, v):
     return 0
 
 def evaluate(graph, solution, k, v):
+    """
+    Função que avalia solução para o TSPd.
+
+    Args:
+        graph (NetworkX.Graph): Grafo do problema. Estrutura suportada pela 
+    NetworkX lib.
+        k (int): Número de entregas no TSPd
+        v (int): Número de entregas no TSPd.
+
+    Return:
+        int or float: avaliação da solução.
+    """
     sCost = 0
     g = graph
     nodes = list(g.nodes)
