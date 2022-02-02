@@ -17,6 +17,34 @@ def nearest_neighbor(graph, k, v):
     Return:
         list: rota com as cidades que devem ser visitadas
     """
+    s = []
+    nodes = list(g.nodes)
+    s.append(nodes[0])
+    visited = {
+        nodes[0]: True
+    }
+    while len(visited) != len(nodes):
+        i = s[len(s)-1]
+        j = None
+
+        # seleciona primeiro visinho
+        for neighbor in g[i]:
+            if neighbor not in visited:
+                j = neighbor
+                break
+
+        # encontra o vizinho mais próximo
+        for neighbor in g[i]:
+            if neighbor not in visited:
+                if g[i][neighbor]['weight'] < g[i][j]['weight']:
+                    j = neighbor
+        
+        visited[j] = True
+        # adiciona o vizinho mais próximo na solução
+        s.append(j)
+
+    s.append(nodes[0])
+    return s
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -64,4 +92,7 @@ if __name__ == '__main__':
 
     problem = tsplib.load(args.file)
     g = problem.get_graph()
-    nearest_neighbor(g, args.k, args.v)
+    sol = nearest_neighbor(g, args.k, args.v)
+    print(sol)
+    cost = evaluate(g, sol, args.k, args.v)
+    print(cost)
