@@ -3,20 +3,16 @@ import tsplib95 as tsplib
 
 deliveriesDict = {}
 
-def getDeliveries(k):
+def getDeliveries(k, nodes):
     deliveries = {}
     if k == 0:
         return deliveries
 
     for i in range(1,k+1):
-        deliveries[i*2] = i*2+1
+        deliveries[nodes[i*2-1]] = nodes[i*2]
+        deliveries[nodes[i*2]] = nodes[i*2-1]
 
     return deliveries
-
-def delivery(i, j, deliveries, v):
-    if i+1 in deliveries and deliveries[i+1] == j+1:
-        return v
-    return 0
 
 def evaluate(graph, solution, k, v):
     """
@@ -35,7 +31,7 @@ def evaluate(graph, solution, k, v):
     g = graph
     nodes = list(g.nodes)
 
-    deliveries = getDeliveries(k)
+    deliveries = getDeliveries(k, nodes)
 
     # sem solução. default é a solução em ordem
     if len(solution) == 0:
@@ -48,8 +44,17 @@ def evaluate(graph, solution, k, v):
         j = solution[n + 1]
 
         sCost += g[i][j]['weight'] 
-        if k != 0:
-            sCost -= delivery(i, j, deliveries, v)
+
+    if k != 0:
+        # deliveries
+        posDelivery = {}
+        for n in range(len(solution)):
+            i = solution[n]
+            if i in deliveries:
+                posDelivery[i] = n
+        for i in range(1,k+1):
+            if posDelivery[nodes[i*2-1]] < posDelivery[nodes[i*2]]:
+                sCost -= v
 
     return sCost
 
