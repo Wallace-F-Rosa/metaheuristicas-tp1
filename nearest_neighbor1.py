@@ -2,7 +2,7 @@ import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
 
-def nearest_neighbor(graph, k, v):
+def nearest_neighbor(graph):
     """
     Função que calcula solução (rota) inicial do TSPd usando heurística do
     vizinho mais próximo. Esta versão só adiciona cidades considerando 
@@ -11,13 +11,12 @@ def nearest_neighbor(graph, k, v):
     Args:
         graph (NetworkX.Graph): Grafo do problema. Estrutura suportada pela 
     NetworkX lib.
-        k (int): Número de entregas no TSPd
-        v (int): Número de entregas no TSPd.
 
     Return:
         list: rota com as cidades que devem ser visitadas
     """
     s = []
+    g = graph
     nodes = list(g.nodes)
     s.append(nodes[0])
     visited = {
@@ -92,7 +91,7 @@ if __name__ == '__main__':
 
     problem = tsplib.load(args.file)
     g = problem.get_graph()
-    sol = nearest_neighbor(g, args.k, args.v)
+    sol = nearest_neighbor(g)
     print(sol)
     cost = evaluate(g, sol, args.k, args.v)
     print(cost)
