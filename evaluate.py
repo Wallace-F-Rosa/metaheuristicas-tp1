@@ -22,7 +22,7 @@ def evaluate(graph, solution, k, v):
         graph (NetworkX.Graph): Grafo do problema. Estrutura suportada pela 
     NetworkX lib.
         k (int): Número de entregas no TSPd
-        v (int): Número de entregas no TSPd.
+        v (int): Valor das entregas no TSPd.
 
     Return:
         int or float: avaliação da solução.
