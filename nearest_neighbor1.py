@@ -41,8 +41,6 @@ def nearest_neighbor(graph):
         visited[j] = True
         # adiciona o vizinho mais próximo na solução
         s.append(j)
-
-    s.append(nodes[0])
     return s
 
 if __name__ == '__main__':

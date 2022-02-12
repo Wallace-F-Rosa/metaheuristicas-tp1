@@ -45,6 +45,8 @@ def evaluate(graph, solution, k, v):
 
         sCost += g[i][j]['weight'] 
 
+    sCost += g[solution[len(solution)-1]][solution[0]]['weight']
+
     if k != 0:
         # deliveries
         posDelivery = {}

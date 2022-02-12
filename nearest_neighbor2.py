@@ -66,7 +66,6 @@ def nearest_neighbor(graph):
                 s.insert(0,r)
             visited[r] = True
 
-    s.append(nodes[0])
     return s
 
 if __name__ == '__main__':
