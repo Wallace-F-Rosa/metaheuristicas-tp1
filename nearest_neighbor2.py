@@ -1,6 +1,7 @@
 import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
+import random
 
 def nearest_neighbor(graph):
     """
@@ -23,6 +24,7 @@ def nearest_neighbor(graph):
         nodes[0]: True
     }
     while len(visited) != len(nodes):
+        beg = s[0]
         i = s[len(s)-1]
         j = None
         k = None
@@ -33,21 +35,27 @@ def nearest_neighbor(graph):
                 j = neighbor
                 break
 
-        k = j
+        for neighbor in g[beg]:
+            if neighbor not in visited:
+                k = neighbor
+                break
 
         # encontra o vizinho mais próximo
         for neighbor in g[i]:
             if neighbor not in visited:
                 if g[i][neighbor]['weight'] < g[i][j]['weight']:
                     j = neighbor
-                if g[neighbor][i]['weight'] < g[k][i]['weight']:
+
+        for neighbor in g[beg]:
+            if neighbor not in visited:
+                if g[neighbor][beg]['weight'] < g[k][beg]['weight']:
                     k = neighbor
-        
-        if g[i][j]['weight'] < g[k][i]['weight']:
+            
+        if g[i][j]['weight'] < g[k][beg]['weight']:
             visited[j] = True
             # adiciona o vizinho mais próximo na solução
             s.append(j)
-        elif g[k][i]['weight'] < g[i][j]['weight']:
+        elif g[k][beg]['weight'] < g[i][j]['weight']:
             visited[k] = True
             s.insert(0,k)
         else:
