@@ -1,8 +1,8 @@
 import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
-from neighborhoods import nearest_neighbor1
 from search import local_search
+from solutions import nearest_neighbor1
 
 def main():
     parser = argparse.ArgumentParser(

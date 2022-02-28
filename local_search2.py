@@ -1,7 +1,7 @@
 import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
-from neighborhoods import nearest_neighbor2
+from solutions import nearest_neighbor2
 from search import local_search
 
 def main():
