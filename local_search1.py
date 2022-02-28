@@ -1,7 +1,7 @@
 import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
-from neighborhoods import nearest_neighbor2
+from neighborhoods import nearest_neighbor1
 from search import local_search
 
 def main():
@@ -50,10 +50,10 @@ def main():
 
     problem = tsplib.load(args.file)
     g = problem.get_graph()
-    sol = nearest_neighbor2(g)
+    sol = nearest_neighbor1(g)
     cost = evaluate(g, sol, args.k, args.v)
 
-    iter_max = 10**2
+    iter_max = 10**4
     iter_no_improve_max = 100
     sol, cost = local_search(g, sol, args.k, args.v, iter_max, iter_no_improve_max)
     print(sol)
