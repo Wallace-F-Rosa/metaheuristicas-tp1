@@ -12,6 +12,7 @@ def create_data_dir(instance):
 def get_instance_data_file(instance, k, v):
     create_data_dir(instance)
     instance_csv = 'experiments/{0}/{0}_{1}_{2}.csv'.format(instance, k, v)
+    print(os.path.isfile(instance_csv))
     if not os.path.isfile(instance_csv):
         with open(instance_csv, 'w+') as csvf:
             csvW = csv.DictWriter(csvf, fieldnames=['instance', 'k', 'v',
@@ -28,7 +29,7 @@ def get_instance_data_file(instance, k, v):
             pass
     return instance_csv
 
-def run_instances(instances, no_delivery=False, only_delivery=False):
+def run_instances(instances, no_delivery=False, only_delivery=False, repeat=10):
     # each instance has args with delivery or not
     args = {
         'gr17': {
@@ -86,50 +87,51 @@ def run_instances(instances, no_delivery=False, only_delivery=False):
 
         for d in delivery:
             for arg in args[instance][d]:
-                k = arg['k']
-                v = arg['v']
-                # create instance csv to hold data
-                instancef = get_instance_data_file(instance, k, v)
-                now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                row = {
-                    'instance': instance,
-                    'timestamp': now
-                }
-                with open(instancef, 'w') as csvf:
-                    # fields=['instance', 'k', 'v',
-                    #             'pheromone_rate',
-                    #             'heuristic_rate',
-                    #             'evaportaion_rate',
-                    #             'nAnts',
-                    #             'nBest',
-                    #             'solution',
-                    #             'cost',
-                    #             'exec_time',
-                    #             'timestamp']
-                    fields = [
-                        'instance',
-                        'k',
-                        'v',
-                        'solution',
-                        'cost',
-                        'exec_time',
-                        'timestamp'
-                    ]
-                    csvW = csv.DictWriter(csvf, fieldnames=fields.copy())
-                    instance_path = 'data/{0}.tsp'.format(instance)
-                    # run heuristic
-                    result = subprocess.run(['python', 'local_search1.py', '-f',
-                                             instance_path,'-k', str(k), '-v',
-                                             str(v)],
-                                            capture_output=True)
-                    # get data from output
-                    lines = result.stdout.decode('utf-8').split("\n")
-                    values = lines[0].split(' ') + lines[1].split(' ')
-                    fields.pop(0)
-                    fields.pop(len(fields)-1)
-                    for i in range(len(fields)):
-                        row[fields[i]] = values[i]
-                    csvW.writerow(row)
+                for r in range(repeat):
+                    k = arg['k']
+                    v = arg['v']
+                    # create instance csv to hold data
+                    instancef = get_instance_data_file(instance, k, v)
+                    now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                    row = {
+                        'instance': instance,
+                        'timestamp': now
+                    }
+                    with open(instancef, 'a') as csvf:
+                        # fields=['instance', 'k', 'v',
+                        #             'pheromone_rate',
+                        #             'heuristic_rate',
+                        #             'evaportaion_rate',
+                        #             'nAnts',
+                        #             'nBest',
+                        #             'solution',
+                        #             'cost',
+                        #             'exec_time',
+                        #             'timestamp']
+                        fields = [
+                            'instance',
+                            'k',
+                            'v',
+                            'solution',
+                            'cost',
+                            'exec_time',
+                            'timestamp'
+                        ]
+                        csvW = csv.DictWriter(csvf, fieldnames=fields.copy())
+                        instance_path = 'data/{0}.tsp'.format(instance)
+                        # run heuristic
+                        result = subprocess.run(['python', 'local_search1.py', '-f',
+                                                 instance_path,'-k', str(k), '-v',
+                                                 str(v), '-e'],
+                                                capture_output=True)
+                        # get data from output
+                        lines = result.stdout.decode('utf-8').split("\n")
+                        values = lines[0].split(' ') + lines[1].split(' ')
+                        fields.pop(0)
+                        fields.pop(len(fields)-1)
+                        for i in range(len(fields)):
+                            row[fields[i]] = values[i]
+                        csvW.writerow(row)
 
 if __name__ == '__main__':
     argparse = argparse.ArgumentParser(description='Experimentos do TP1'+
@@ -137,22 +139,28 @@ if __name__ == '__main__':
     argparse.add_argument('--all',
                           '-a',
                           action='store_true',
-                          help='Roda o experimento em todas as instâncias',
+                          help='Roda o experimento em todas as instâncias.',
                           default=True
                           )
     argparse.add_argument('--no-delivery',
                           '-nd',
                           action='store_true',
                           help='Roda o experimento em todas as instâncias'+
-                          'somente sem os valores de entrega',
+                          'somente sem os valores de entrega.',
                           default=False)
 
     argparse.add_argument('--delivery',
                           '-d',
                           action='store_true',
                           help='Roda o experimento em todas as instâncias'+
-                          'somente com os valores de entrega',
+                          'somente com os valores de entrega.',
                           default=False)
+    
+    argparse.add_argument('--repeat',
+                          '-r',
+                          type=int,
+                          help='Informa quantas vezes rodar cada instâncias.',
+                          default=1)
     instances = [
         'gr17',
         'gr21',
@@ -172,4 +180,4 @@ if __name__ == '__main__':
 
     if args.instances:
         instances = args.instances
-    run_instances(instances, args.no_delivery, args.delivery)
+    run_instances(instances, args.no_delivery, args.delivery, args.repeat)
