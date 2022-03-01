@@ -12,6 +12,16 @@ setup(
 )
 
 setup(
+    name='Solution related functions',
+    ext_modules=cythonize('solutions.py')
+)
+
+setup(
+    name='Population related functions',
+    ext_modules=cythonize('populations.py')
+)
+
+setup(
     name='Evaluate functions',
     ext_modules=cythonize('evaluate.py')
 )
