@@ -1,7 +1,3 @@
-import tsplib95 as tsplib
-from evaluate import evaluate
-import random
-
 def valid_route(graph, route):
     """
     Função que valida se uma rota é valida no grafo.
