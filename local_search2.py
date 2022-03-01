@@ -1,3 +1,4 @@
+import time
 import argparse
 import tsplib95 as tsplib
 from evaluate import evaluate
@@ -43,11 +44,21 @@ def main():
         ' Default: solução em ordem.'
     )
     
+    parser.add_argument(
+        '--exec-data',
+        '-e',
+        action='store_true',
+        required=False,
+        help='Imprime dados de execução como os parâmetros de execução: k, v, solução, custo e tempo de execução',
+        default=False
+    )
+
     args = parser.parse_args()
     sol = []
     if args.solution is not None:
         sol = args.solution
 
+    start = time.time()
     problem = tsplib.load(args.file)
     g = problem.get_graph()
     sol = nearest_neighbor2(g)
@@ -56,8 +67,11 @@ def main():
     iter_max = 10**2
     iter_no_improve_max = 100
     sol, cost = local_search(g, sol, args.k, args.v, iter_max, iter_no_improve_max)
-    print(sol)
-    print(cost)
+    if args.exec_data:
+        print(args.k, args.v)
+        print(str(sol).replace(' ', ''), cost, '%s' % ((time.time() - start)*1000))
+    else:
+        print(sol, cost)
 
 if __name__ == '__main__':
     main()
