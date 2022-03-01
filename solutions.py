@@ -1,3 +1,4 @@
+import random
 """
     Functions related to the solution of the TSDp problem, e.g. finding
     a initial solution, adding noise to an existing solution, etc.
@@ -105,3 +106,4 @@ def nearest_neighbor1(graph):
         # adiciona o vizinho mais próximo na solução
         s.append(j)
     return s
+
