@@ -230,8 +230,7 @@ class Grasp:
         it = 0
         while it < self.iterMax:
             s1 = self.construct()
-            s1, s1Cost = local_search(self.graph, s, self.k, self.v, self.iterMax, self.iterMax*0.1)
-
+            s1, s1Cost = local_search(self.graph, s, self.k, self.v, self.iterMax, self.iterMax*0.1, tabu=self.tabu)
 
             if s1Cost < cost:
                 s = s1
