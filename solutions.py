@@ -25,9 +25,19 @@ def nearest_neighbor2(graph, start_node = 0):
     while len(visited) != len(nodes):
         beg = s[0]
         i = s[len(s)-1]
-        j = g[i][0]
-        k = g[s[0]][0]
+        j = None
+        k = None
 
+        # seleciona primeiro visinho
+        for neighbor in g[i]:
+            if neighbor not in visited:
+                j = neighbor
+                break
+
+        for neighbor in g[beg]:
+            if neighbor not in visited:
+                k = neighbor
+                break
 
         # encontra o vizinho mais próximo
         for neighbor in g[i]:
