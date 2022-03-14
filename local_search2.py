@@ -64,12 +64,12 @@ def main():
     sol = nearest_neighbor2(g)
     cost = evaluate(g, sol, args.k, args.v)
 
-    iter_max = 10**2
+    iter_max = 10**4
     iter_no_improve_max = 100
     sol, cost = local_search(g, sol, args.k, args.v, iter_max, iter_no_improve_max)
     if args.exec_data:
         print(args.k, args.v)
-        print(str(sol).replace(' ', ''), cost, '%s' % ((time.time() - start)*1000))
+        print(str(sol).replace(' ', ''), cost, '%s' % (time.time() - start))
     else:
         print(sol, cost)
 

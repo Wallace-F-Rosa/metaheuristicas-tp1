@@ -69,7 +69,7 @@ def main():
     sol, cost = local_search(g, sol, args.k, args.v, iter_max, iter_no_improve_max)
     if args.exec_data:
         print(args.k, args.v)
-        print(str(sol).replace(' ', ''), cost, '%s' % ((time.time() - start)*1000))
+        print(str(sol).replace(' ', ''), cost, '%s' % (time.time() - start))
     else:
         print(sol, cost)
 
