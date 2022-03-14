@@ -11,7 +11,7 @@ considerando a possibilidade de fazer entregas entre as cidades (TSPd
 ## Rodando projeto 
 Usamos o comando abaixo para compilar o código pytho utilizando [Cython](https://cython.readthedocs.io/en/latest/index.html):
 
-`python setup.py`
+`python setup.py build_ext --inplace`
 
 Agora é possível executar alguma das soluções:
 
