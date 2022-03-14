@@ -22,7 +22,7 @@ def best_improvement(graph, sol, candidates, k, v):
 
     return best, best_cost
 
-def local_search(graph, s0, k, v, iter_max, iter_no_improve_max, tabu=[]):
+def local_search(graph, s0, k, v, iter_max, iter_no_improve_max, tabu={}):
     """
     Função que calcula solução (rota) utilizando busca local com vizinhança
     2-opt. 
