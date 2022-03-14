@@ -8,8 +8,8 @@ from search import local_search
 def main():
     parser = argparse.ArgumentParser(
         description='Programa lê uma instância da tsplib '+
-        'e gera solução inicial utilizando a heurística do vizinho mais '+
-        'próximo. Versão 1: adiciona cidades somente no final da solução.'
+        'e gera uma solução utilizando busca local. '+
+        'Solução inicial fornecida pela versão 2 do Nearest Neighbor.'
     )
     parser.add_argument(
         '--file',
