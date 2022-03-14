@@ -15,7 +15,7 @@ def valid_route(graph, route):
             return False
     return True
 
-def neighborhood_swap(graph, sol, tabu=[]):
+def neighborhood_swap(graph, sol, tabu={}):
     """
     Função que calcula vizinhança 2-opt.
 
@@ -33,7 +33,10 @@ def neighborhood_swap(graph, sol, tabu=[]):
     for i in range(0, len(sol)-3):
         for j in range(i+2, len(sol)-(i==0)):
             jf = (j+1)%len(sol)
-            if sol[j] in graph[sol[i]] and sol[jf] in graph[sol[i+1]]:
+            edge = (neighbor[j], neighbor[i+1])
+            isNeighbor = sol[j] in graph[sol[i]] and sol[jf] in graph[sol[i+1]]
+            isTabu = True if edge in tabu and tabu[edge] > 0 else False
+            if isNeighbor and not isTabu:
                 neighbor[i+1], neighbor[j] = neighbor[j], neighbor[i+1]
                 neighbors.append(neighbor.copy())
                 neighbor[i+1], neighbor[j] = neighbor[j], neighbor[i+1]
@@ -64,10 +67,10 @@ def neighborhood_2opt(graph, sol, tabu={}):
             if isNeighbor:
                 beg = i+1
                 end = jf
-                while beg > end:
+                while beg < end:
                     neighbor[beg], neighbor[end] = neighbor[end], neighbor[beg]
                     edge = (neighbor[beg], neighbor[end])
-                    isTabu = edge in tabu and tabu[edge] > 0
+                    isTabu = True if edge in tabu and tabu[edge] > 0 else False
                     if isTabu:
                         tabuOpt = True
                         break
