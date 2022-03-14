@@ -1,6 +1,7 @@
 from evaluate import evaluate
-from solutions import nearest_neighbor2
+from solutions import nearest_neighbor2, nearest_neighbor1
 from neighborhoods import neighborhood_2opt
+from search import local_search
 import random
 from math import exp, ceil
 
@@ -102,15 +103,13 @@ class SimulatedAnnealing:
         iterMax (int): número máximo de iterações .
         iterNoImproveMax (int): número máximo de iterações sem melhora.
     """
-    def __init__(self, graph, k, v, Tmax, Tmin, r, iterMax=10**4, iterNoImproveMax=100):
+    def __init__(self, graph, k, v, Tmax, Tmin, r):
         self.graph = graph
         self.k = k
         self.v = v
         self.Tmax = Tmax
         self.Tmin = Tmin
         self.r = r
-        self.iterMax = iterMax
-        self.iterNoImproveMax = iterNoImproveMax
 
     def candidate_cost(self, s):
         return evaluate(self.graph, s, self.k, self.v)
@@ -121,7 +120,7 @@ class SimulatedAnnealing:
     def candidate(self, neighbors):
         return max(neighbors, key=self.candidate_cost)
 
-    def optimize(self):
+    def find_solution(self):
         """
         Executar otimização. Utiliza os parâmetros fornecidos
         para determinar as rotas construidas pelas formigas, atualizando
@@ -138,9 +137,107 @@ class SimulatedAnnealing:
         while T >= self.Tmin:
             candidate = self.candidate(neighborhood_2opt(self.graph, s))
             cCost = evaluate(self.graph, candidate, self.k, self.v)
-            if cCost < cost or random.randint(0,99)/100 < exp((cCost - cost)/T): 
+            delta = cCost - cost
+            if cCost < cost or random.random() < exp(-delta/T): 
                 s = candidate.copy()
                 cost = cCost
             it +=1
-            T = T*self.r
+            T = T*(1-self.r)
+        return s, cost
+
+class Grasp:
+    """
+    Classe que implementa a heurística GRASP. Solução inicial é construída via
+    nearest neighbor e otimizada usando busca local. A busca Tabu é utilizada
+    durante a construção da lista de candidatos.  Critério de parada é atingir
+    o número máximo de iterações ou número máximo de iterações sem melhora da
+    solução.
+
+    Args:
+        graph (NetworkX.Graph): grafo do TSPd.
+        a (float): Porcentagem da CL utilizada na RCL. Valores entre 0 e 1
+        iterMax (int): número máximo de iterações .
+        iterNoImproveMax (int): número máximo de iterações sem melhora.
+    """
+    def __init__(self, graph, k, v, a, iterMax=100, iterNoImproveMax=10):
+        self.graph = graph
+        self.k = k
+        self.v = v
+        self.a = a
+        self.iterMax = iterMax
+        self.iterNoImproveMax = iterNoImproveMax
+        self.tabu = {}
+        self.nodes = list(graph.nodes())
+
+    def candidate_cost(self, s):
+        return evaluate(self.graph, s, self.k, self.v)
+
+    def rcl(self, node, visited):
+        g = self.graph
+        cl = []
+        clNotVisited = []
+        for i in g[node]:
+            notTabu = (node,i) not in self.tabu or self.tabu[(node,i)] == 0
+            notVisisted = i not in visited
+            if notVisisted:
+                clNotVisited.append((node,i))
+                if notTabu:
+                    cl.append((i, g[node][i]['weight']))
+        # ignore tabu if edge is needed
+        if len(cl) == 0:
+            cl = clNotVisited
+        rclSize = ceil(len(cl)*self.a)
+        if rclSize < 3:
+            return sorted(cl, key=lambda i: i[1])
+
+        return sorted(cl, key=lambda i: i[1])[:rclSize]
+
+    def construct(self):
+        s = []
+        startNode = random.randint(0, len(self.nodes)-1)
+        s.append(self.nodes[startNode])
+        visited = { self.nodes[startNode]: True }
+        while len(visited) != len(self.nodes):
+            i = s[len(s)-1]
+            candidates = self.rcl(i, visited)
+            c = candidates[0]
+            if len(candidates) > 1:
+                c = random.choice(candidates)
+            s.append(c[0])
+            visited[c[0]] = True
+
         return s
+
+    def update_tabu_list(self, s):
+        t = random.randint(0, len(s)-1)
+        for move in self.tabu:
+            if self.tabu[move] > 0:
+                self.tabu[move] -= 1
+        self.tabu[(self.nodes[t], self.nodes[(t+1)%len(s)])] = 2
+
+    def find_solution(self):
+        """
+        Executar heurística. Utiliza os parâmetros fornecidos
+        para determinar as rotas construidas pelas formigas, atualizando
+        a matrix de feromônios de forma off-line e elitista.
+
+        Return:
+            (list, float): solução (rota) com cidades a serem visitadas e custo da
+            solução.
+        """
+        s = nearest_neighbor1(self.graph)
+        cost = evaluate(self.graph, s, self.k, self.v)
+        it = 0
+        while it < self.iterMax:
+            s1 = self.construct()
+            s1, s1Cost = local_search(self.graph, s, self.k, self.v, self.iterMax, self.iterMax*0.1)
+
+
+            if s1Cost < cost:
+                s = s1
+                cost = s1Cost
+
+            self.update_tabu_list(s)
+            it +=1
+
+        return s, cost
