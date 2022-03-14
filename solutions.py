@@ -3,7 +3,7 @@ import random
     Functions related to the solution of the TSDp problem, e.g. finding
     a initial solution, adding noise to an existing solution, etc.
 """
-def nearest_neighbor2(graph):
+def nearest_neighbor2(graph, start_node = 0):
     """
     Função que calcula solução (rota) inicial do TSPd usando heurística do
     vizinho mais próximo. Esta versão adiciona cidades no inicio e final da rota.
@@ -11,6 +11,7 @@ def nearest_neighbor2(graph):
     Args:
         graph (NetworkX.Graph): Grafo do problema. Estrutura suportada pela 
     NetworkX lib.
+        start_node (int): Vértice de inicio, valor default é o vértice 0.
 
     Return:
         list: rota com as cidades que devem ser visitadas
@@ -18,7 +19,7 @@ def nearest_neighbor2(graph):
     s = []
     g = graph
     nodes = list(g.nodes)
-    s.append(nodes[0])
+    s.append(nodes[start_node])
     visited = {
         nodes[0]: True }
     while len(visited) != len(nodes):
@@ -66,7 +67,7 @@ def nearest_neighbor2(graph):
 
     return s
 
-def nearest_neighbor1(graph):
+def nearest_neighbor1(graph, start_node = 0):
     """
     Função que calcula solução (rota) inicial do TSPd usando heurística do
     vizinho mais próximo. Esta versão só adiciona cidades considerando 
@@ -75,6 +76,7 @@ def nearest_neighbor1(graph):
     Args:
         graph (NetworkX.Graph): Grafo do problema. Estrutura suportada pela 
     NetworkX lib.
+        start_node (int): Vértice de inicio, valor default é o vértice 0.
 
     Return:
         list: rota com as cidades que devem ser visitadas
@@ -82,7 +84,7 @@ def nearest_neighbor1(graph):
     s = []
     g = graph
     nodes = list(g.nodes)
-    s.append(nodes[0])
+    s.append(nodes[start_node])
     visited = {
         nodes[0]: True
     }
