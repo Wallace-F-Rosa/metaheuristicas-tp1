@@ -25,19 +25,9 @@ def nearest_neighbor2(graph, start_node = 0):
     while len(visited) != len(nodes):
         beg = s[0]
         i = s[len(s)-1]
-        j = None
-        k = None
+        j = g[i][0]
+        k = g[s[0]][0]
 
-        # seleciona primeiro visinho
-        for neighbor in g[i]:
-            if neighbor not in visited:
-                j = neighbor
-                break
-
-        for neighbor in g[beg]:
-            if neighbor not in visited:
-                k = neighbor
-                break
 
         # encontra o vizinho mais próximo
         for neighbor in g[i]:
@@ -45,26 +35,31 @@ def nearest_neighbor2(graph, start_node = 0):
                 if g[i][neighbor]['weight'] < g[i][j]['weight']:
                     j = neighbor
 
-        for neighbor in g[beg]:
+        for neighbor in g[s[0]]:
             if neighbor not in visited:
-                if g[neighbor][beg]['weight'] < g[k][beg]['weight']:
+                if g[neighbor][s[0]]['weight'] < g[k][s[0]]['weight']:
                     k = neighbor
             
-        if g[i][j]['weight'] < g[k][beg]['weight']:
+        if g[i][j]['weight'] < g[k][s[0]]['weight']:
             visited[j] = True
             # adiciona o vizinho mais próximo na solução
             s.append(j)
-        elif g[k][beg]['weight'] < g[i][j]['weight']:
+        elif g[k][s[0]]['weight'] < g[i][j]['weight']:
             visited[k] = True
             s.insert(0,k)
+            beg += 1
         else:
             r = random.choice([j,k])
             if r == j:
                 s.append(r)
             else:
                 s.insert(0,r)
+                beg += 1
             visited[r] = True
 
+        for i in range(0,beg):
+            c = s.pop(0)
+            s.append(c)
     return s
 
 def nearest_neighbor1(graph, start_node = 0):
