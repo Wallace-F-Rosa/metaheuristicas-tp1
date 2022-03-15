@@ -3,6 +3,7 @@ import subprocess
 import argparse
 import csv
 import os
+from tqdm import tqdm
 
 def create_data_dir(instance):
     instance_dir = 'experiments_grasp/{0}'.format(instance)
@@ -83,55 +84,67 @@ def run_instances(instances, no_delivery=False, only_delivery=False, repeat=10):
         },
     }
 
+    total_exec = 0
     for instance in instances:
         delivery = [False,True]
         if no_delivery:
             delivery.pop(1)
         elif only_delivery:
             delivery.pop(0)
-
         for d in delivery:
-            for arg in args[instance][d]:
-                for r in range(repeat):
-                    k = arg['k']
-                    v = arg['v']
-                    iter_max = arg['iter_max']
-                    a = arg['a']
-                    # create instance csv to hold data
-                    instancef = get_instance_data_file(instance, k, v)
-                    now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                    row = {
-                        'instance': instance,
-                        'timestamp': now
-                    }
-                    with open(instancef, 'a') as csvf:
-                        fields = ['instance', 'k', 'v',
-                                    'iterMax',
-                                    'a',
-                                    'solution',
-                                    'cost',
-                                    'exec_time',
-                                    'timestamp']                        
-                        csvW = csv.DictWriter(csvf, fieldnames=fields.copy())
-                        instance_path = 'data/{0}.tsp'.format(instance)
-                        # run heuristic
-                        result = subprocess.run(['python',
-                                                 'grasp_custom.py',
-                                                 '-f', instance_path,
-                                                 '-k', str(k),
-                                                 '-v', str(v),
-                                                 '-i', str(iter_max),
-                                                 '-a', str(a),
-                                                 '-e'],
-                                                capture_output=True)
-                        # get data from output
-                        lines = result.stdout.decode('utf-8').split("\n")
-                        values = lines[0].split(' ') + lines[1].split(' ')
-                        fields.pop(0)
-                        fields.pop(len(fields)-1)
-                        for i in range(len(fields)):
-                            row[fields[i]] = values[i]
-                        csvW.writerow(row)
+            total_exec += len(args[instance][d])*repeat
+
+    with tqdm(total=total_exec) as progress_bar:
+        for instance in instances:
+            delivery = [False,True]
+            if no_delivery:
+                delivery.pop(1)
+            elif only_delivery:
+                delivery.pop(0)
+
+            for d in delivery:
+                for arg in args[instance][d]:
+                    for r in range(repeat):
+                        k = arg['k']
+                        v = arg['v']
+                        iter_max = arg['iter_max']
+                        a = arg['a']
+                        # create instance csv to hold data
+                        instancef = get_instance_data_file(instance, k, v)
+                        now = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                        row = {
+                            'instance': instance,
+                            'timestamp': now
+                        }
+                        with open(instancef, 'a') as csvf:
+                            fields = ['instance', 'k', 'v',
+                                        'iterMax',
+                                        'a',
+                                        'solution',
+                                        'cost',
+                                        'exec_time',
+                                        'timestamp']                        
+                            csvW = csv.DictWriter(csvf, fieldnames=fields.copy())
+                            instance_path = 'data/{0}.tsp'.format(instance)
+                            # run heuristic
+                            result = subprocess.run(['python',
+                                                     'grasp_custom.py',
+                                                     '-f', instance_path,
+                                                     '-k', str(k),
+                                                     '-v', str(v),
+                                                     '-i', str(iter_max),
+                                                     '-a', str(a),
+                                                     '-e'],
+                                                    capture_output=True)
+                            # get data from output
+                            lines = result.stdout.decode('utf-8').split("\n")
+                            values = lines[0].split(' ') + lines[1].split(' ')
+                            fields.pop(0)
+                            fields.pop(len(fields)-1)
+                            for i in range(len(fields)):
+                                row[fields[i]] = values[i]
+                            csvW.writerow(row)
+                        progress_bar.update(1)
 
 if __name__ == '__main__':
     argparse = argparse.ArgumentParser(description='Experimentos do TP1'+
