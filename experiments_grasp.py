@@ -29,8 +29,8 @@ def run_instances(instances, no_delivery=False, only_delivery=False, repeat=10):
     # each instance has args with delivery or not
     args = {
         'gr17': {
-            True: [{'k': 3, 'v': 80, 'iter_max': 10, 'a': 0.2}],
-            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}],
+            True: [{'k': 3, 'v': 80, 'iter_max': 10, 'a': 0.1}],
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.1}],
         },
         'gr21': {
             True: [],
@@ -58,28 +58,28 @@ def run_instances(instances, no_delivery=False, only_delivery=False, repeat=10):
             ]
         },
         'berlin52': {
-            True: [{'k': 3, 'v': 90, 'iter_max': 100, 'a': 0.2}],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            True: [{'k': 3, 'v': 90, 'iter_max': 10, 'a': 0.2}],
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
         'fri26': {
             True: [],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
         'eil51': {
             True: [],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
         'eil76': {
             True: [],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
         'eil101': {
-            True: [{'k': 10, 'v': 5, 'iter_max': 100, 'a': 0.2}],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            True: [{'k': 10, 'v': 5, 'iter_max': 10, 'a': 0.2}],
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
         'a280': {
-            True: [{'k': 10, 'v': 10, 'iter_max': 100, 'a': 0.2}],
-            False: [{'k': 0, 'v': 0, 'iter_max': 100, 'a': 0.2}]
+            True: [{'k': 10, 'v': 10, 'iter_max': 10, 'a': 0.2}],
+            False: [{'k': 0, 'v': 0, 'iter_max': 10, 'a': 0.2}]
         },
     }
 
