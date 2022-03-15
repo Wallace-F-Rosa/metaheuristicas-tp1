@@ -27,29 +27,81 @@ class AntColony:
         iterMax (int): número máximo de iterações .
         iterNoImproveMax (int): número máximo de iterações sem melhora.
     """
-    def __init__(self, graph, k, v, pheromone_rate=0.8, heuristic_rate=0.2,
-                     evaporation_rate=0.2, nAnts=20, nBest=3, iterMax = 10**4,
-                 iterNoImproveMax = 100):
+    def __init__(self, graph, k, v, pheromone_rate=0.8, pheromone_max=1, evaporation_rate=0.2,
+                 nAnts=20, nBest=3, iterMax = 10**4):
         self.pheromone_matrix = {}
         self.graph = graph
         self.k = k
         self.v = v
         self.pheromone_rate = pheromone_rate
-        self.heuristic_rate = heuristic_rate
+        self.pheromone_max = pheromone_max
+        self.heuristic_rate = 1 - pheromone_rate
         self.evaporation_rate = evaporation_rate
         self.nAnts = nAnts
         self.nBest = nBest
         self.iterMax = iterMax
-        self.iterNoImproveMax = iterNoImproveMax
+        self.tabu = {}
 
     def evaporation(self):
-        pass
+        for edge in self.pheromone_matrix:
+            self.pheromone_matrix[edge] *= 1 - self.evaporation_rate
+        if self.pheromone_rate < self.pheromone_max:
+            newp = self.pheromone_rate * (1 - self.evaporation_rate)
+            self.pheromone_rate = newp if newp < self.pheromone_max else self.pheromone_max
+            self.heuristic_rate = 1 - self.pheromone_rate
 
-    def reinforcement(self):
-        pass
+    def reinforcement(self, S):
+        S_eval = sorted(S, key=self.evaluate_sol)
+        
+        s_best = []
+        cost = 0
+        for best in range(self.nBest):
+            s = S_eval[best]
+            sCost = self.evaluate_sol(s)
+            if best == 0:
+                s_best = s
+                cost = sCost
+            for i in range(0, len(s)-1):
+                edge = (s[i], s[i+1])
+                self.pheromone_matrix[edge] += 1/cost
+
+        return s_best, cost
 
     def construct(self):
-        pass
+        s = []
+        g = self.graph
+        nodes = list(g.nodes())
+        start_node = random.choice(nodes)
+        s.append(start_node)
+        visited = {
+            start_node: True
+        }
+
+        t = self.pheromone_matrix
+        a = self.pheromone_rate
+        b = self.heuristic_rate
+
+        while len(visited) != len(nodes):
+            i = s[len(s)-1]
+
+            candidates = []
+            P = []
+            pDivisor = 0
+            for j in g[i]:
+                edge = (i,j)
+                isCandidate = j not in visited
+                notTabu = True if edge not in self.tabu or self.tabu[edge] == 0 else False
+                if isCandidate and notTabu:
+                    pDividend = (t[edge]**a) * (g[i][j]['weight']**b)
+                    pDivisor += pDividend
+                    candidates.append(j)
+                    P.append(pDividend)
+            P = [p/pDivisor for p in P]
+            candidate = random.choices(candidates, weights=P, k=1)
+
+            visited[candidate] = True
+            s.append(candidate)
+                    
 
     def init_pheromone_matrix(self):
         for e in self.graph.edges():
@@ -70,24 +122,19 @@ class AntColony:
         """
         self.init_pheromone_matrix()
         best_sol = None
-        iterNoImprove = 0
+        cost = 0
         S = []
         for ant in range(self.nAnts):
             S.append([])
+
         for it in range(self.iterMax):
             for ant in self.nAnts:
                 S[ant] = self.construct()
             
-            # improv_rate = abs(new_best[1]/best_sol[1] - 1)
-            # if improv_rate < 0.01:
-            #     iterNoImprove +=1
-            self.reinforcement()
+            best_sol, cost = self.reinforcement(S)
             self.evaporation()
 
-            if iterNoImprove >= self.iterNoImproveMax:
-                break
-
-        return best_sol
+        return best_sol, cost
 
 class SimulatedAnnealing:
     """
