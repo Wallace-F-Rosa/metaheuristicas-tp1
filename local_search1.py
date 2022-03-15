@@ -63,7 +63,6 @@ def main():
     g = problem.get_graph()
     sol = nearest_neighbor1(g)
     cost = evaluate(g, sol, args.k, args.v)
-
     iter_max = 10**4
     iter_no_improve_max = 100
     sol, cost = local_search(g, sol, args.k, args.v, iter_max, iter_no_improve_max)
