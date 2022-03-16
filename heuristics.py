@@ -13,22 +13,22 @@ class AntColony:
     solução.
 
     Args:
-        graph (NetworkX.Graph): grafo do TSPd.
-        k (int): Número de entregas no TSPd
-        v (int): Valor das entregas no TSPd.
-        pheromone_rate (float): influência do feromônio na escolha da
-        solução.
-        heuristic_rate (float): influência da heurística na escolha da
-        solução.
-        evaporation_rate (float): taxa de evaporação do feromônio.
-        nAnts (int): number of ants to be used in optimization.
-        nBest (int): número das melhores formigas que influenciam na
-        atualização do feromônio.
-        iterMax (int): número máximo de iterações .
-        iterNoImproveMax (int): número máximo de iterações sem melhora.
+    graph (NetworkX.Graph): grafo do TSPd.
+    k (int): Número de entregas no TSPd
+    v (int): Valor das entregas no TSPd.
+    pheromone_rate (float): influência do feromônio na escolha da
+    solução. A influência da distância é definida como 1 - pheromone_rates.
+    pheromone_max (float): valor máximo de influência do feromônio.
+    evaporation_rate (float): define a taxa de evaporação e a taxa de aumento da
+    influência do feromônio.
+    nAnts (int): number of ants to be used in optimization.
+    nBest (int): número das melhores formigas que influenciam na
+    atualização do feromônio.
+    iterMax (int): número máximo de iterações .
+    iterNoImproveMax (int): número máximo de iterações sem melhora.
     """
-    def __init__(self, graph, k, v, pheromone_rate=0.8, pheromone_max=1, evaporation_rate=0.2,
-                 nAnts=20, nBest=3, iterMax = 10**4):
+    def __init__(self, graph, k, v, pheromone_rate=0.8, pheromone_max=1, evaporation_rate=0.02,
+                 nAnts=20, nBest=3, iterMax = 10**4, iterNoImproveMax = 10):
         self.pheromone_matrix = {}
         self.graph = graph
         self.k = k
@@ -40,6 +40,7 @@ class AntColony:
         self.nAnts = nAnts
         self.nBest = nBest
         self.iterMax = iterMax
+        self.iterNoImproveMax = iterNoImproveMax
         self.tabu = {}
 
     def evaporation(self):
@@ -57,6 +58,7 @@ class AntColony:
         cost = 0
         for best in range(self.nBest):
             s = S_eval[best]
+            print(s)
             sCost = self.evaluate_sol(s)
             if best == 0:
                 s_best = s
@@ -97,44 +99,59 @@ class AntColony:
                     candidates.append(j)
                     P.append(pDividend)
             P = [p/pDivisor for p in P]
-            candidate = random.choices(candidates, weights=P, k=1)
+            candidate = random.choices(candidates, weights=P, k=1)[0]
 
             visited[candidate] = True
             s.append(candidate)
-                    
+
+        return s, self.evaluate_sol(s)
 
     def init_pheromone_matrix(self):
         for e in self.graph.edges():
-            self.pheromone_matrix[e] = 1
+            self.pheromone_matrix[(e[0],e[1])] = 1
+            self.pheromone_matrix[(e[1],e[0])] = 1
 
     def evaluate_sol(self, s):
         return evaluate(self.graph, s, self.k, self.v)
 
-    def optimization(self):
+    def find_solution(self):
         """
         Otimização por colônia de formigas. Utiliza os parâmetros fornecidos
         para determinar as rotas construidas pelas formigas, atualizando
         a matrix de feromônios de forma off-line e elitista.
 
         Return:
-            (list, float): solução (rota) com cidades a serem visitadas e custo da
-            solução.
+        (list, float): solução (rota) com cidades a serem visitadas e custo da
+        solução.
         """
         self.init_pheromone_matrix()
-        best_sol = None
-        cost = 0
+        best, cost = self.construct()
         S = []
         for ant in range(self.nAnts):
             S.append([])
 
+        iter_no_improv = 0
         for it in range(self.iterMax):
-            for ant in self.nAnts:
+            for ant in range(self.nAnts):
                 S[ant] = self.construct()
             
-            best_sol, cost = self.reinforcement(S)
+            new_s, new_cost = self.reinforcement(S)
+            self.evaporation()
+            if new_cost < cost:
+                improv_rate = 1 - new_cost/cost
+                if improv_rate < 0.01:
+                    iter_no_improv +=1
+                best = new_s
+                cost = new_cost
+            else:
+                iter_no_improv += 1
+
+            if iter_no_improv > self.iterNoImproveMax:
+                break
+
             self.evaporation()
 
-        return best_sol, cost
+        return best, cost
 
 class SimulatedAnnealing:
     """
