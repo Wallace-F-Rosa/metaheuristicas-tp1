@@ -48,7 +48,7 @@ class AntColony:
         for edge in self.pheromone_matrix:
             self.pheromone_matrix[edge] *= 1 - self.evaporation_rate
         if self.pheromone_rate < self.pheromone_max:
-            newp = self.pheromone_rate * (1 - self.evaporation_rate)
+            newp = self.pheromone_rate * (1 + self.evaporation_rate)
             self.pheromone_rate = newp if newp < self.pheromone_max else self.pheromone_max
             self.heuristic_rate = 1 - self.pheromone_rate
 
@@ -92,14 +92,18 @@ class AntColony:
             for j in g[i]:
                 edge = (i,j)
                 isCandidate = j not in visited
-                notTabu = True if edge not in self.tabu or self.tabu[edge] == 0 else False
-                if isCandidate and notTabu:
+                if isCandidate:
                     pDividend = (t[edge]**a) * (g[i][j]['weight']**b)
                     pDivisor += pDividend
                     candidates.append(j)
                     P.append(pDividend)
             P = [p/pDivisor for p in P]
             candidate = random.choices(candidates, weights=P, k=1)[0]
+            if len(candidates) > 1:
+                for nTry in range(3):
+                    if candidate not in self.tabu:
+                        break
+                    candidate = random.choices(candidates, weights=P, k=1)[0]
 
             visited[candidate] = True
             s.append(candidate)
@@ -108,8 +112,8 @@ class AntColony:
 
     def init_pheromone_matrix(self):
         for e in self.graph.edges():
-            self.pheromone_matrix[(e[0],e[1])] = 1
-            self.pheromone_matrix[(e[1],e[0])] = 1
+            self.pheromone_matrix[(e[0],e[1])] = random.uniform(0.01, 1)
+            self.pheromone_matrix[(e[1],e[0])] = random.uniform(0.01, 1)
 
     def evaluate_sol(self, s):
         return evaluate(self.graph, s, self.k, self.v)
