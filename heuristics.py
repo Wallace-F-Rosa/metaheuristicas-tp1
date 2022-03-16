@@ -4,6 +4,7 @@ from neighborhoods import neighborhood_2opt
 from search import local_search
 import random
 from math import exp, ceil
+from operator import itemgetter
 
 class AntColony:
     """
@@ -52,14 +53,13 @@ class AntColony:
             self.heuristic_rate = 1 - self.pheromone_rate
 
     def reinforcement(self, S):
-        S_eval = sorted(S, key=self.evaluate_sol)
+        S_eval = sorted(S, key=itemgetter(1))
         
         s_best = []
         cost = 0
         for best in range(self.nBest):
-            s = S_eval[best]
-            print(s)
-            sCost = self.evaluate_sol(s)
+            s = S_eval[best][0]
+            sCost = S_eval[best][1]
             if best == 0:
                 s_best = s
                 cost = sCost
