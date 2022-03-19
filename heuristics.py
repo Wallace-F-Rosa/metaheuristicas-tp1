@@ -171,8 +171,9 @@ class SimulatedAnnealing:
         iterMax (int): número máximo de iterações .
         iterNoImproveMax (int): número máximo de iterações sem melhora.
     """
-    def __init__(self, graph, k, v, Tmax, Tmin, r):
+    def __init__(self, graph, s0, k, v, Tmax, Tmin, r):
         self.graph = graph
+        self.s0 = s0
         self.k = k
         self.v = v
         self.Tmax = Tmax
@@ -198,7 +199,7 @@ class SimulatedAnnealing:
             (list, float): solução (rota) com cidades a serem visitadas e custo da
             solução.
         """
-        s = nearest_neighbor2(self.graph)
+        s = self.s0
         cost = evaluate(self.graph, s, self.k, self.v)
         T = self.Tmax
         it = 0
@@ -206,7 +207,7 @@ class SimulatedAnnealing:
             candidate = self.candidate(neighborhood_2opt(self.graph, s))
             cCost = evaluate(self.graph, candidate, self.k, self.v)
             delta = cCost - cost
-            if cCost < cost or random.random() < exp(-delta/T): 
+            if cCost < cost or random.randint(0,99)/100 < exp(-delta/T): 
                 s = candidate.copy()
                 cost = cCost
             it +=1
@@ -304,7 +305,9 @@ class Grasp:
                 s = s1
                 cost = s1Cost
 
-            self.update_tabu_list(s)
+
+
+            self.update_tabu_list(s1)
             it +=1
 
         return s, cost
