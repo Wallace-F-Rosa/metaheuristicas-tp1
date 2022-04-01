@@ -297,17 +297,23 @@ class Grasp:
         s = nearest_neighbor1(self.graph)
         cost = evaluate(self.graph, s, self.k, self.v)
         it = 0
+        iterNoImprove = 0
         while it < self.iterMax:
             s1 = self.construct()
             s1, s1Cost = local_search(self.graph, s1, self.k, self.v, self.iterMax, self.iterMax*0.1, tabu=self.tabu)
 
             if s1Cost < cost:
+                improv_rate = 1 - s1Cost/cost
+                if improv_rate < 0.01:
+                    iterNoImprove +=1
                 s = s1
                 cost = s1Cost
-
-
+            else:
+                iterNoImprove += 1
 
             self.update_tabu_list(s1)
             it +=1
+            if iterNoImprove > self.iterNoImproveMax:
+                break
 
         return s, cost
