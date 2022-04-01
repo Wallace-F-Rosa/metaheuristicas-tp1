@@ -140,7 +140,6 @@ class AntColony:
                 S[ant] = self.construct()
             
             new_s, new_cost = self.reinforcement(S)
-            self.evaporation()
             if new_cost < cost:
                 improv_rate = 1 - new_cost/cost
                 if improv_rate < 0.01:
